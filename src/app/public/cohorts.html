@@ -1,0 +1,48 @@
+<div class="shell page">
+  <header class="page-head">
+    <p class="eyebrow">Instructor-led bootcamp</p>
+    <h1>Choose your cohort.</h1>
+    <p>
+      Build a project from start to finish. Each cohort fee is split into three monthly
+      installments.
+    </p>
+  </header>
+  <div class="track-grid cohort-grid">
+    @for (cohort of cohorts; track cohort.track) {
+      <article
+        class="track-card"
+        [attr.data-track]="cohort.track"
+        [class.highlighted]="selected === cohort.track"
+      >
+        <div class="track-top">
+          <span class="track-mark" aria-hidden="true">{{ cohort.mark }}</span
+          ><span class="eyebrow">{{ cohort.length }}</span>
+        </div>
+        <h2>{{ cohort.name }}</h2>
+        <p>{{ cohort.detail }}</p>
+        <div class="cohort-price">
+          <strong>{{ money(cohort.price / 3) }}</strong
+          ><span> × 3 · {{ money(cohort.price) }} total</span>
+        </div>
+        @if (enrolled(cohort.track)) {
+          <a class="button ink" routerLink="/student"
+            >View installments <span aria-hidden="true">↗</span></a
+          >
+        } @else if (store.canAccess('student')) {
+          <button class="button ink" (click)="enroll(cohort)">
+            Enroll <span aria-hidden="true">↗</span>
+          </button>
+        } @else if (!store.user()) {
+          <a
+            class="button ink"
+            routerLink="/login"
+            [queryParams]="{ next: '/cohorts?track=' + cohort.track }"
+            >Log in to enroll <span aria-hidden="true">↗</span></a
+          >
+        } @else {
+          <span class="muted">Enrollment is available to students.</span>
+        }
+      </article>
+    }
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="shell home">
+  <section class="hero">
+    <img
+      class="hero-art"
+      src="art/cohort-knot.webp"
+      alt=""
+      width="1536"
+      height="1024"
+      fetchpriority="high"
+    />
+    <div class="hero-content">
+      <p class="eyebrow hero-label">
+        <span class="live-dot"></span> Coding bootcamp &amp; digital store
+      </p>
+      <h1>Learn by<br /><em>building.</em></h1>
+      <p>
+        Train in Web, Data or Cyber. Pick up practical courses and project kits for whatever you’re
+        building next.
+      </p>
+      <div class="hero-actions">
+        <a class="button electric" routerLink="/cohorts"
+          >Explore cohorts <span aria-hidden="true">↗</span></a
+        >
+        <a class="button outline-light" routerLink="/store"
+          >Browse the store <span aria-hidden="true">→</span></a
+        >
+      </div>
+    </div>
+  </section>
+  <section class="home-tracks" aria-labelledby="track-heading">
+    <div class="section-head">
+      <h2 id="track-heading">Find your track.</h2>
+      <p>Instructor-led cohorts with project work and three monthly installments.</p>
+    </div>
+    <div class="track-grid">
+      @for (cohort of cohorts; track cohort.track) {
+        <a
+          class="track-card"
+          [attr.data-track]="cohort.track"
+          routerLink="/cohorts"
+          [queryParams]="{ track: cohort.track }"
+        >
+          <div class="track-top">
+            <span class="track-mark" aria-hidden="true">{{ cohort.mark }}</span
+            ><span class="track-arrow" aria-hidden="true">↗</span>
+          </div>
+          <span class="eyebrow">{{ cohort.length }}</span>
+          <h3>{{ cohort.name }}</h3>
+          <p>{{ cohort.title }}</p>
+        </a>
+      }
+    </div>
+  </section>
+  <section class="store-promo">
+    <div>
+      <p class="eyebrow">Digital store</p>
+      <h2>Tools for the next project.</h2>
+      <p>Shop standalone courses, downloadable templates and practice assessment vouchers.</p>
+    </div>
+    <a class="button ink" routerLink="/store"
+      >Shop digital products <span aria-hidden="true">↗</span></a
+    >
+  </section>
+</div>

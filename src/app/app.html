@@ -1,0 +1,60 @@
+<a class="skip-link" href="#main" (click)="skip($event)">Skip to content</a>
+<header class="site-header">
+  <div class="shell nav-shell">
+    <a class="brand" routerLink="/" aria-label="CodeMart home"
+      ><span class="brand-mark" aria-hidden="true"></span>CodeMart<span class="brand-period"
+        >.</span
+      ></a
+    >
+    <nav class="main-nav" aria-label="Main navigation">
+      <a routerLink="/cohorts" routerLinkActive="selected" ariaCurrentWhenActive="page">Cohorts</a>
+      <a routerLink="/store" routerLinkActive="selected" ariaCurrentWhenActive="page"
+        >Digital store</a
+      >
+      @if (store.canAccess('student')) {
+        <a routerLink="/student" routerLinkActive="selected" ariaCurrentWhenActive="page"
+          >My learning</a
+        >
+      }
+      @if (store.canAccess('admin', 'accountant')) {
+        <a routerLink="/office" routerLinkActive="selected" ariaCurrentWhenActive="page">Finance</a>
+      }
+    </nav>
+    <div class="nav-actions">
+      @if (!store.user() || store.canAccess('student')) {
+        <a class="nav-bag" routerLink="/bag" aria-label="Shopping bag">
+          <span aria-hidden="true" class="bag-icon"></span
+          ><span class="bag-count">{{ store.cart().length }}</span>
+        </a>
+      }
+      @if (store.user(); as user) {
+        <a class="nav-login" routerLink="/profile">Profile</a>
+        <button class="button ink small sign-out" (click)="logout()">Sign out</button>
+      } @else {
+        <a class="nav-login" routerLink="/login">Log in</a>
+        <a class="button ink small nav-signup" routerLink="/signup"
+          >Get started <span aria-hidden="true">↗</span></a
+        >
+      }
+    </div>
+  </div>
+</header>
+<main id="main" tabindex="-1"><router-outlet /></main>
+<footer class="site-footer">
+  <div class="shell footer-row">
+    <a class="brand" routerLink="/"
+      ><span class="brand-mark" aria-hidden="true"></span>CodeMart<span class="brand-period"
+        >.</span
+      ></a
+    >
+    <span>GIU Web Programming · Milestone 1</span>
+    <a class="button light small" routerLink="/profile"
+      >Your profile <span aria-hidden="true">↗</span></a
+    >
+  </div>
+</footer>
+<div class="live-region" role="status" aria-live="polite">
+  @if (feedback.status(); as status) {
+    <div class="toast">{{ status }}</div>
+  }
+</div>

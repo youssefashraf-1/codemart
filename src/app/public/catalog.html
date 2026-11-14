@@ -1,0 +1,73 @@
+<div class="shell page">
+  <header class="page-head">
+    <p class="eyebrow">CodeMart shop</p>
+    <h1>Digital store.</h1>
+    <p>Find short courses, project templates and practice assessment vouchers.</p>
+  </header>
+  <div class="filters">
+    <label
+      >Search
+      <input
+        type="search"
+        placeholder="Search the catalog"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+    /></label>
+    <label
+      >Track
+      <select [ngModel]="trackFilter()" (ngModelChange)="trackFilter.set($event)">
+        <option value="All">All tracks</option>
+        @for (track of tracks; track track) {
+          <option>{{ track }}</option>
+        }
+      </select></label
+    >
+    <label
+      >Category
+      <select [ngModel]="kindFilter()" (ngModelChange)="kindFilter.set($event)">
+        <option value="All">All categories</option>
+        @for (kind of kinds; track kind) {
+          <option>{{ kind }}</option>
+        }
+      </select></label
+    >
+  </div>
+  <div class="product-grid">
+    @for (product of filtered(); track product.id) {
+      <article class="product">
+        <div class="product-art" [attr.data-track]="product.track">
+          <span class="eyebrow">{{ product.track }}</span>
+          <span class="product-glyph" aria-hidden="true">{{
+            product.kind === 'Course' ? '&lt;/&gt;' : product.kind === 'Template' ? '▥' : '◇'
+          }}</span>
+        </div>
+        <div class="product-body">
+          <p class="eyebrow">{{ product.kind }}</p>
+          <h2>{{ product.name }}</h2>
+          <p>{{ product.description }}</p>
+          <div class="product-actions">
+            <strong>{{ money(product.price) }}</strong>
+            @if (!store.user() || store.canAccess('student')) {
+              <button
+                type="button"
+                class="button small"
+                [class.ink]="!inBag(product.id)"
+                [class.light]="inBag(product.id)"
+                [attr.aria-label]="
+                  (inBag(product.id) ? 'Remove ' : 'Add ') +
+                  product.name +
+                  (inBag(product.id) ? ' from bag' : ' to bag')
+                "
+                (click)="toggle(product)"
+              >
+                {{ inBag(product.id) ? 'Remove' : 'Add to bag' }}
+              </button>
+            }
+          </div>
+        </div>
+      </article>
+    } @empty {
+      <p class="empty">No items match these filters.</p>
+    }
+  </div>
+</div>

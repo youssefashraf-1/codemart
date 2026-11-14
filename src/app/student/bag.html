@@ -1,0 +1,51 @@
+<div class="shell page">
+  <header class="page-head">
+    <p class="eyebrow">Digital store</p>
+    <h1>Your bag.</h1>
+  </header>
+  @if (store.cart().length) {
+    <div class="checkout-grid">
+      <section class="panel" aria-label="Bag items">
+        @for (item of store.cart(); track item.id) {
+          <div class="bag-row">
+            <div>
+              <p class="eyebrow">{{ item.track }} · {{ item.kind }}</p>
+              <h2>{{ item.name }}</h2>
+            </div>
+            <strong>{{ money(item.price) }}</strong
+            ><button
+              class="button light small"
+              (click)="remove(item.id)"
+              [attr.aria-label]="'Remove ' + item.name"
+            >
+              Remove
+            </button>
+          </div>
+        }
+      </section>
+      <aside class="panel summary">
+        <h2>Order summary</h2>
+        <div class="summary-total">
+          <span>Total</span><strong>{{ money(subtotal()) }}</strong>
+        </div>
+        <p class="muted">Demo checkout. No payment is collected.</p>
+        @if (store.canAccess('student')) {
+          <button class="button ink" (click)="checkout()">
+            Place demo order <span aria-hidden="true">↗</span>
+          </button>
+        } @else {
+          <a class="button ink" routerLink="/login" [queryParams]="{ next: '/bag' }"
+            >Log in to check out <span aria-hidden="true">↗</span></a
+          >
+        }
+      </aside>
+    </div>
+  } @else {
+    <div class="empty">
+      <h2>Your bag is empty.</h2>
+      <a class="button ink" routerLink="/store"
+        >Browse the store <span aria-hidden="true">↗</span></a
+      >
+    </div>
+  }
+</div>

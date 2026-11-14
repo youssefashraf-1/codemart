@@ -1,0 +1,554 @@
+<div class="shell page">
+  <header class="office-header">
+    <div>
+      <p class="eyebrow">
+        <span class="live-dot"></span>
+        {{ store.canAccess('admin') ? 'Administrator' : 'Accounting personnel' }}
+      </p>
+      <h1>Finance workspace.</h1>
+      <p>Track student fees, digital sales and payroll.</p>
+    </div>
+    <div class="office-actions">
+      <label
+        >Report month <input type="month" [ngModel]="month()" (ngModelChange)="setMonth($event)"
+      /></label>
+      <button class="button electric" (click)="exportReport()">
+        Export JSON <span aria-hidden="true">↓</span>
+      </button>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Finance sections">
+    @for (item of menu(); track item) {
+      <button
+        [class.selected]="section() === item"
+        [attr.aria-current]="section() === item ? 'page' : null"
+        (click)="select(item)"
+      >
+        {{ item }}
+      </button>
+    }
+  </nav>
+  @switch (section()) {
+    @case ('Overview') {
+      <div class="stat-grid">
+        <div class="stat">
+          <span>Income</span><strong>{{ money(totalIncome()) }}</strong>
+        </div>
+        <div class="stat">
+          <span>Expenses</span><strong>{{ money(totalExpense()) }}</strong>
+        </div>
+        <div class="stat accented">
+          <span>Net balance</span><strong>{{ money(balance()) }}</strong>
+        </div>
+      </div>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Revenue &amp; expenses by track</h2>
+            <p>{{ monthLabel(month()) }} · EGP</p>
+          </div>
+        </div>
+        <app-finance-chart [departments]="report().departments" />
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Track totals">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Track</th>
+                <th scope="col">Fees</th>
+                <th scope="col">Store sales</th>
+                <th scope="col">Other income</th>
+                <th scope="col">Expenses</th>
+                <th scope="col">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of report().departments; track row.track) {
+                <tr>
+                  <th scope="row">{{ row.track }}</th>
+                  <td>{{ money(row.fees) }}</td>
+                  <td>{{ money(row.sales) }}</td>
+                  <td>{{ money(row.otherIncome) }}</td>
+                  <td>{{ money(row.expenses) }}</td>
+                  <td>
+                    <strong>{{ money(row.balance) }}</strong>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Department budget</h2>
+            <p>
+              Record other income and operating expenses. Fees, sales and payroll are calculated
+              automatically.
+            </p>
+          </div>
+          <button class="button ink small" (click)="newBudget()">
+            Add entry <span aria-hidden="true">+</span>
+          </button>
+        </div>
+        @if (budget(); as entry) {
+          <form
+            class="inline-form"
+            #budgetForm="ngForm"
+            (ngSubmit)="budgetForm.valid && saveBudget()"
+          >
+            <h3>{{ entry.id ? 'Edit budget entry' : 'New budget entry' }}</h3>
+            <div class="form-grid">
+              <label
+                >Description <input name="label" [(ngModel)]="entry.label" required maxlength="100"
+              /></label>
+              <label
+                >Track
+                <select name="track" [(ngModel)]="entry.track">
+                  @for (track of tracks; track track) {
+                    <option>{{ track }}</option>
+                  }
+                </select></label
+              >
+              <label
+                >Type
+                <select name="type" [(ngModel)]="entry.type">
+                  <option>Expense</option>
+                  <option>Income</option>
+                </select></label
+              >
+              <label
+                >Date <input type="date" name="date" [(ngModel)]="entry.date" required
+              /></label>
+              <label
+                >Amount (EGP)
+                <input
+                  type="number"
+                  name="amount"
+                  [(ngModel)]="entry.amount"
+                  required
+                  min="1"
+                  max="1000000"
+                  step="1"
+              /></label>
+            </div>
+            <div class="form-actions">
+              <button class="button ink small" [disabled]="budgetForm.invalid">
+                Save budget entry</button
+              ><button type="button" class="button light small" (click)="budget.set(null)">
+                Cancel
+              </button>
+            </div>
+          </form>
+        }
+        @if (report().budgetEntries.length) {
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Budget entries">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Entry</th>
+                  <th scope="col">Track</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of report().budgetEntries; track entry.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ entry.label }}</strong
+                      ><span class="cell-note">{{ entry.type }}</span>
+                    </td>
+                    <td>{{ entry.track }}</td>
+                    <td>{{ entry.date | date: 'mediumDate' }}</td>
+                    <td>{{ money(entry.amount) }}</td>
+                    <td>
+                      <div class="table-actions">
+                        <button
+                          class="button light small"
+                          (click)="editBudget(entry)"
+                          [attr.aria-label]="'Edit ' + entry.label"
+                        >
+                          Edit</button
+                        ><button
+                          class="button light small"
+                          (click)="deleteBudget(entry)"
+                          [attr.aria-label]="'Remove ' + entry.label"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted">No budget entries for this month.</p>
+        }
+      </section>
+    }
+    @case ('Student fees') {
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Student invoices</h2>
+            <p>Issue invoices and review payment history across all cohorts.</p>
+          </div>
+          <button class="button ink small" (click)="newInvoice()">
+            Create invoice <span aria-hidden="true">+</span>
+          </button>
+        </div>
+        @if (invoice(); as entry) {
+          <form
+            class="inline-form"
+            #invoiceForm="ngForm"
+            (ngSubmit)="invoiceForm.valid && saveInvoice()"
+          >
+            <h3>New invoice</h3>
+            <div class="form-grid">
+              <label
+                >Student
+                <select name="student" [(ngModel)]="entry.studentId" required>
+                  @for (student of students(); track student.id) {
+                    <option [value]="student.id">
+                      {{ student.name }} ({{ student.username }})
+                    </option>
+                  }
+                </select></label
+              >
+              <label
+                >Track
+                <select name="track" [(ngModel)]="entry.track">
+                  @for (track of tracks; track track) {
+                    <option>{{ track }}</option>
+                  }
+                </select></label
+              >
+              <label
+                >Description
+                <input name="description" [(ngModel)]="entry.label" required maxlength="100"
+              /></label>
+              <label
+                >Due date <input type="date" name="date" [(ngModel)]="entry.dueOn" required
+              /></label>
+              <label
+                >Amount (EGP)
+                <input
+                  type="number"
+                  name="amount"
+                  [(ngModel)]="entry.amount"
+                  required
+                  min="1"
+                  max="1000000"
+                  step="1"
+              /></label>
+            </div>
+            <div class="form-actions">
+              <button class="button ink small" [disabled]="invoiceForm.invalid">
+                Issue invoice</button
+              ><button type="button" class="button light small" (click)="invoice.set(null)">
+                Cancel
+              </button>
+            </div>
+          </form>
+        }
+        <label class="table-filter"
+          >Payment status
+          <select [ngModel]="feeFilter()" (ngModelChange)="feeFilter.set($event)">
+            <option value="all">All invoices</option>
+            <option value="paid">Paid</option>
+            <option value="due">Unpaid</option>
+          </select></label
+        >
+        @if (fees().length) {
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Student invoice history">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Student</th>
+                  <th scope="col">Invoice</th>
+                  <th scope="col">Issued</th>
+                  <th scope="col">Due</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (invoice of fees(); track invoice.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ studentName(invoice.studentId) }}</strong
+                      ><span class="cell-note">{{ invoice.track }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ invoice.label }}</strong
+                      ><span class="cell-note">{{ invoice.id }}</span>
+                    </td>
+                    <td>{{ invoice.issuedOn | date: 'mediumDate' }}</td>
+                    <td>{{ invoice.dueOn | date: 'mediumDate' }}</td>
+                    <td>{{ money(invoice.amount) }}</td>
+                    <td>
+                      @if (invoice.paidOn) {
+                        <span class="pill good">Paid</span
+                        ><span class="cell-note">{{ invoice.paidOn | date: 'mediumDate' }}</span>
+                      } @else {
+                        <button
+                          class="button light small"
+                          (click)="markPaid(invoice.id)"
+                          [attr.aria-label]="'Mark ' + invoice.id + ' paid'"
+                        >
+                          Mark paid
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted">No invoices match this filter.</p>
+        }
+      </section>
+    }
+    @case ('Payroll') {
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Instructor payroll</h2>
+            <p>{{ monthLabel(month()) }} · Royalties come from course orders placed this month.</p>
+          </div>
+          <button class="button ink small" (click)="exportReport(true)">
+            Payroll JSON <span aria-hidden="true">↓</span>
+          </button>
+        </div>
+        @if (payroll(); as entry) {
+          <form class="inline-form" #payForm="ngForm" (ngSubmit)="payForm.valid && savePayroll()">
+            <h3>Update {{ monthLabel(month()) }} pay terms</h3>
+            <div class="form-grid">
+              <label
+                >Salary (EGP)
+                <input
+                  type="number"
+                  name="salary"
+                  [(ngModel)]="entry.salary"
+                  required
+                  min="0"
+                  max="1000000"
+                  step="1"
+              /></label>
+              <label
+                >Allowances (EGP)
+                <input
+                  type="number"
+                  name="allowances"
+                  [(ngModel)]="entry.allowances"
+                  required
+                  min="0"
+                  max="1000000"
+                  step="1"
+              /></label>
+              <label
+                >Deductions (EGP)
+                <input
+                  type="number"
+                  name="deductions"
+                  [(ngModel)]="entry.deductions"
+                  required
+                  min="0"
+                  max="1000000"
+                  step="1"
+              /></label>
+            </div>
+            <div class="form-actions">
+              <button class="button ink small" [disabled]="payForm.invalid">
+                Save payroll terms</button
+              ><button type="button" class="button light small" (click)="payroll.set(null)">
+                Cancel
+              </button>
+            </div>
+          </form>
+        }
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Instructor pay">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Instructor</th>
+                <th scope="col">Salary</th>
+                <th scope="col">Allowances</th>
+                <th scope="col">Deductions</th>
+                <th scope="col">Royalties</th>
+                <th scope="col">Net pay</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of report().payroll; track row.id) {
+                <tr>
+                  <td>
+                    <strong>{{ row.name }}</strong
+                    ><span class="cell-note"
+                      >{{ row.track }} · {{ row.royalty }}% course royalty</span
+                    >
+                  </td>
+                  <td>{{ money(row.salary) }}</td>
+                  <td>{{ money(row.allowances) }}</td>
+                  <td>{{ money(row.deductions) }}</td>
+                  <td>{{ money(row.royalties) }}</td>
+                  <td>
+                    <strong>{{ money(row.net) }}</strong>
+                  </td>
+                  <td>
+                    <button
+                      class="button light small"
+                      (click)="editPayroll(row)"
+                      [attr.aria-label]="'Edit pay for ' + row.name"
+                    >
+                      Edit pay
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+    @case ('Catalog') {
+      @if (store.canAccess('admin')) {
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Catalog management</h2>
+              <p>Update digital products and control what appears in the storefront.</p>
+            </div>
+            <button class="button ink small" (click)="newProduct()">
+              Add product <span aria-hidden="true">+</span>
+            </button>
+          </div>
+          @if (product(); as item) {
+            <form
+              class="inline-form"
+              #productForm="ngForm"
+              (ngSubmit)="productForm.valid && saveProduct()"
+            >
+              <h3>{{ item.id ? 'Edit product' : 'New product' }}</h3>
+              <div class="form-grid">
+                <label
+                  >Name <input name="name" [(ngModel)]="item.name" required maxlength="70"
+                /></label>
+                <label
+                  >Track
+                  <select
+                    name="track"
+                    [(ngModel)]="item.track"
+                    (ngModelChange)="item.instructorId = ''"
+                  >
+                    @for (track of tracks; track track) {
+                      <option>{{ track }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Category
+                  <select name="category" [(ngModel)]="item.kind">
+                    @for (kind of kinds; track kind) {
+                      <option>{{ kind }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  >Price (EGP)
+                  <input
+                    type="number"
+                    name="price"
+                    [(ngModel)]="item.price"
+                    required
+                    min="1"
+                    max="1000000"
+                    step="1"
+                /></label>
+                @if (item.kind === 'Course') {
+                  <label
+                    >Instructor
+                    <select name="instructor" [(ngModel)]="item.instructorId" required>
+                      <option value="">Select an instructor</option>
+                      @for (person of store.instructors(); track person.id) {
+                        @if (person.track === item.track) {
+                          <option [value]="person.id">{{ person.name }}</option>
+                        }
+                      }
+                    </select></label
+                  >
+                }
+              </div>
+              <label
+                >Description
+                <textarea
+                  name="description"
+                  [(ngModel)]="item.description"
+                  required
+                  maxlength="240"
+                  rows="2"
+                ></textarea>
+              </label>
+              <label class="check-label"
+                ><input type="checkbox" name="active" [(ngModel)]="item.active" /> Visible in the
+                store</label
+              >
+              <div class="form-actions">
+                <button class="button ink small" [disabled]="productForm.invalid">
+                  Save product</button
+                ><button type="button" class="button light small" (click)="product.set(null)">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          }
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Digital products">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col">Track</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Visibility</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of store.catalogue(); track item.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ item.name }}</strong
+                      ><span class="cell-note">{{ item.kind }}</span>
+                    </td>
+                    <td>{{ item.track }}</td>
+                    <td>{{ money(item.price) }}</td>
+                    <td>
+                      <span class="pill" [class.good]="item.active">{{
+                        item.active ? 'Live' : 'Hidden'
+                      }}</span>
+                    </td>
+                    <td>
+                      <button
+                        class="button light small"
+                        (click)="editProduct(item)"
+                        [attr.aria-label]="'Edit ' + item.name"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    }
+  }
+</div>

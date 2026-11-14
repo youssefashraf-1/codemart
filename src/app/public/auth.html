@@ -1,0 +1,133 @@
+<div class="shell page auth-layout">
+  <aside class="auth-side">
+    <img src="art/cohort-knot.webp" alt="" width="1536" height="1024" loading="lazy" />
+    <div>
+      <p class="eyebrow">CodeMart accounts</p>
+      @if (joining) {
+        <h2>Make a start.</h2>
+        <p>
+          Create a student account to enroll in cohorts, manage your installments and shop digital
+          products.
+        </p>
+      } @else {
+        <h2>Pick up where you left off.</h2>
+        <p>
+          Sign in to your student or staff account. Sample accounts are available for the course
+          demonstration.
+        </p>
+      }
+    </div>
+  </aside>
+  <section class="auth-form">
+    <h1>{{ joining ? 'Create an account.' : 'Log in.' }}</h1>
+    @if (!joining) {
+      <fieldset class="demo-buttons">
+        <legend>Fill in demo credentials</legend>
+        @for (demo of demos; track demo.id) {
+          <button type="button" class="button light small" (click)="fillDemo(demo.username)">
+            {{
+              demo.role === 'accountant'
+                ? 'Accounting'
+                : demo.role === 'admin'
+                  ? 'Admin'
+                  : 'Student'
+            }}
+          </button>
+        }
+      </fieldset>
+    }
+    <form #authForm="ngForm" (ngSubmit)="authForm.valid && submit()" class="form-stack">
+      @if (joining) {
+        <label
+          >Full name
+          <input
+            name="fullName"
+            [(ngModel)]="form.name"
+            required
+            maxlength="80"
+            autocomplete="name"
+        /></label>
+      }
+      <label
+        >Username
+        <input
+          name="username"
+          [(ngModel)]="form.username"
+          required
+          maxlength="24"
+          autocomplete="username"
+          autocapitalize="none"
+      /></label>
+      @if (joining) {
+        <label
+          >Email
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="form.email"
+            required
+            email
+            maxlength="120"
+            autocomplete="email"
+        /></label>
+      }
+      <label
+        >Password
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="form.password"
+          required
+          [minlength]="joining ? 8 : 1"
+          maxlength="128"
+          [attr.autocomplete]="joining ? 'new-password' : 'current-password'"
+      /></label>
+      @if (joining) {
+        <div class="form-grid">
+          <label
+            >Preferred track
+            <select name="track" [(ngModel)]="form.track">
+              @for (track of tracks; track track) {
+                <option>{{ track }}</option>
+              }
+            </select></label
+          >
+          <label
+            >Demo credit card
+            <select name="card" [(ngModel)]="form.card">
+              <option value="">No test card</option>
+              <option value="4242">Test Visa · 4242</option>
+              <option value="5556">Test Mastercard · 5556</option>
+            </select></label
+          >
+        </div>
+        <label
+          >Profile photo <span class="field-note">Optional · PNG, JPG or WebP · up to 250 KB</span
+          ><input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            (change)="photo($event)"
+            [disabled]="loadingPhoto()"
+        /></label>
+      }
+      @if (error()) {
+        <p role="alert" class="form-error">{{ error() }}</p>
+      }
+      <button
+        class="button ink"
+        type="submit"
+        [disabled]="authForm.invalid || busy() || loadingPhoto()"
+      >
+        {{ busy() ? 'Working…' : joining ? 'Create student account' : 'Log in' }}
+        <span aria-hidden="true">↗</span>
+      </button>
+    </form>
+    <p class="auth-switch">
+      @if (joining) {
+        Already registered? <a routerLink="/login" [queryParams]="{ next }">Log in</a>
+      } @else {
+        New to CodeMart? <a routerLink="/signup" [queryParams]="{ next }">Create an account</a>
+      }
+    </p>
+  </section>
+</div>

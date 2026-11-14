@@ -1,0 +1,129 @@
+<div class="shell page">
+  <header class="page-head split">
+    <div>
+      <p class="eyebrow">Student workspace</p>
+      <h1>My learning.</h1>
+      <p>
+        Hi, {{ store.user()?.name }}. Review your installments and access your digital purchases.
+      </p>
+    </div>
+    <a class="button ink" routerLink="/cohorts"
+      >Explore cohorts <span aria-hidden="true">↗</span></a
+    >
+  </header>
+  <nav class="tabs" aria-label="Student workspace">
+    <a
+      routerLink="/student"
+      [class.selected]="!ordersSelected()"
+      [attr.aria-current]="!ordersSelected() ? 'page' : null"
+      >Cohort fees</a
+    >
+    <a
+      routerLink="/student"
+      [queryParams]="{ view: 'orders' }"
+      [class.selected]="ordersSelected()"
+      [attr.aria-current]="ordersSelected() ? 'page' : null"
+      >Digital orders</a
+    >
+  </nav>
+  @if (ordersSelected()) {
+    <div class="orders">
+      @for (order of store.orders(); track order.id) {
+        <article class="panel order">
+          <header>
+            <div>
+              <h2>{{ order.id }}</h2>
+              <p>{{ order.date | date: 'mediumDate' }}</p>
+            </div>
+            <strong>{{ money(sumOrder(order)) }}</strong>
+          </header>
+          @for (line of order.lines; track line.productId) {
+            <div class="order-line">
+              <div>
+                <span class="eyebrow">{{ line.track }} · {{ line.kind }}</span
+                ><strong>{{ line.name }}</strong>
+              </div>
+              <button class="button light small" (click)="download(order, line)">
+                Download sample <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          }
+        </article>
+      } @empty {
+        <section class="empty">
+          <h2>No orders yet.</h2>
+          <a class="button ink" routerLink="/store"
+            >Browse the store <span aria-hidden="true">↗</span></a
+          >
+        </section>
+      }
+    </div>
+  } @else {
+    <div class="stat-grid">
+      <div class="stat">
+        <span>Cohorts joined</span><strong>{{ store.enrollments().length }}</strong>
+      </div>
+      <div class="stat">
+        <span>Total paid</span><strong>{{ money(paid()) }}</strong>
+      </div>
+      <div class="stat">
+        <span>Outstanding balance</span><strong>{{ money(due()) }}</strong>
+      </div>
+    </div>
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Installments &amp; payment history</h2>
+          <p>Pay individual invoices using the classroom payment simulator.</p>
+        </div>
+      </div>
+      @if (store.invoices().length) {
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Your invoices">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Invoice</th>
+                <th scope="col">Due</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Status</th>
+                <th scope="col">Payment</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (invoice of store.invoices(); track invoice.id) {
+                <tr>
+                  <td>
+                    <strong>{{ invoice.label }}</strong
+                    ><span class="cell-note">{{ invoice.id }}</span>
+                  </td>
+                  <td>{{ invoice.dueOn | date: 'mediumDate' }}</td>
+                  <td>{{ money(invoice.amount) }}</td>
+                  <td>
+                    <span class="pill" [class.good]="invoice.paidOn">{{
+                      invoice.paidOn ? 'Paid' : 'Due'
+                    }}</span>
+                  </td>
+                  <td>
+                    @if (invoice.paidOn) {
+                      {{ invoice.paidOn | date: 'mediumDate' }}
+                    } @else {
+                      <button
+                        class="button ink small"
+                        (click)="pay(invoice.id)"
+                        [attr.aria-label]="'Pay ' + invoice.id + ' in demo'"
+                      >
+                        Pay in demo
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="muted">Join a cohort to create your installment plan.</p>
+      }
+    </section>
+  }
+</div>
