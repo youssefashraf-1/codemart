@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { demoPassword, demos, tracks } from '../domain';
+import { demoPassword, demos, schedules, tracks } from '../domain';
 import { Feedback } from '../feedback';
 import { Registration, Store } from '../store';
 
@@ -17,6 +17,7 @@ export class Auth {
   protected readonly joining = this.route.snapshot.routeConfig?.path === 'signup';
   protected readonly demos = demos;
   protected readonly tracks = tracks;
+  protected readonly schedules = schedules;
   protected readonly busy = signal(false);
   protected readonly loadingPhoto = signal(false);
   protected readonly error = signal('');
@@ -29,6 +30,7 @@ export class Auth {
     track: this.store.preferredTrack() ?? 'Web',
     card: '',
     avatar: '',
+    preferences: { schedule: 'Weekday evenings', updates: true },
   };
 
   protected fillDemo(username: string) {

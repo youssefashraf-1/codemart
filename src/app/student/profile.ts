@@ -47,6 +47,14 @@ import { Store } from '../store';
                 <dt>Demo credit card</dt>
                 <dd>{{ user.card ? 'Test card · •••• ' + user.card : 'No test card selected' }}</dd>
               </div>
+              <div>
+                <dt>Study schedule</dt>
+                <dd>{{ user.preferences?.schedule ?? 'Not set' }}</dd>
+              </div>
+              <div>
+                <dt>Email updates</dt>
+                <dd>{{ user.preferences?.updates ? 'Subscribed' : 'Off' }}</dd>
+              </div>
             }
           </dl>
           <a class="button ink" [routerLink]="user.role === 'student' ? '/student' : '/office'"

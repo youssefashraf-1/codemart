@@ -101,6 +101,21 @@
             </select></label
           >
         </div>
+        <fieldset class="preferences">
+          <legend>Learning preferences</legend>
+          <label
+            >Study schedule
+            <select name="schedule" [(ngModel)]="form.preferences.schedule">
+              @for (schedule of schedules; track schedule) {
+                <option>{{ schedule }}</option>
+              }
+            </select></label
+          >
+          <label class="check-label"
+            ><input type="checkbox" name="updates" [(ngModel)]="form.preferences.updates" /> Email
+            me cohort and store updates</label
+          >
+        </fieldset>
         <label
           >Profile photo <span class="field-note">Optional · PNG, JPG or WebP · up to 250 KB</span
           ><input

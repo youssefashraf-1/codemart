@@ -21,6 +21,16 @@
       }
     </nav>
     <div class="nav-actions">
+      <button
+        type="button"
+        class="sound-toggle"
+        (click)="feedback.toggleSound()"
+        [attr.aria-pressed]="feedback.sound()"
+        [attr.aria-label]="feedback.sound() ? 'Mute sound effects' : 'Turn on sound effects'"
+        [title]="feedback.sound() ? 'Sound on' : 'Sound off'"
+      >
+        <span aria-hidden="true">{{ feedback.sound() ? '🔊' : '🔇' }}</span>
+      </button>
       @if (!store.user() || store.canAccess('student')) {
         <a class="nav-bag" routerLink="/bag" aria-label="Shopping bag">
           <span aria-hidden="true" class="bag-icon"></span
@@ -55,6 +65,9 @@
 </footer>
 <div class="live-region" role="status" aria-live="polite">
   @if (feedback.status(); as status) {
-    <div class="toast">{{ status }}</div>
+    <div class="toast" [class.error]="feedback.tone() === 'error'">{{ status }}</div>
   }
 </div>
+@defer (on idle) {
+  <app-assistant />
+}
