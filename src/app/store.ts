@@ -4,6 +4,7 @@ import {
   BudgetEntry,
   Invoice,
   PayrollTerms,
+  Preferences,
   Product,
   Records,
   Role,
@@ -13,6 +14,7 @@ import {
   demoPassword,
   demos,
   kinds,
+  schedules,
   monthlyReport,
   orderLine,
   today,
@@ -65,6 +67,7 @@ export interface Registration {
   card: string;
   avatar: string;
   password: string;
+  preferences: Preferences;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -194,6 +197,8 @@ export class Store {
     if (input.card && !['4242', '5556'].includes(input.card))
       throw new Error('Choose a test card from the list.');
     if (!tracks.includes(input.track)) throw new Error('Choose a track.');
+    if (!schedules.includes(input.preferences?.schedule))
+      throw new Error('Choose a study schedule.');
     if (
       input.avatar &&
       (!/^data:image\/(png|jpeg|webp);base64,/.test(input.avatar) || input.avatar.length > 350_000)
@@ -210,6 +215,7 @@ export class Store {
       track: input.track,
       card: input.card,
       avatar: input.avatar,
+      preferences: { schedule: input.preferences.schedule, updates: !!input.preferences.updates },
       role: 'student',
       credential: { salt, hash },
     };

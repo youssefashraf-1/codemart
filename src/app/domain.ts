@@ -3,6 +3,13 @@ export const kinds = ['Course', 'Template', 'Voucher'] as const;
 export type Track = (typeof tracks)[number];
 export type Kind = (typeof kinds)[number];
 export type Role = 'student' | 'accountant' | 'admin';
+export const schedules = ['Weekday mornings', 'Weekday evenings', 'Weekends'] as const;
+export type Schedule = (typeof schedules)[number];
+
+export interface Preferences {
+  schedule: Schedule;
+  updates: boolean;
+}
 
 export interface Account {
   id: string;
@@ -13,6 +20,7 @@ export interface Account {
   track: Track;
   card: string;
   avatar: string;
+  preferences?: Preferences;
   credential?: { salt: string; hash: string };
 }
 

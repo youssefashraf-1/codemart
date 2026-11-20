@@ -10,6 +10,7 @@ export function seed(): Records {
         track: 'Web' as const,
         card: person.role === 'student' ? '4242' : '',
         avatar: '',
+        preferences: { schedule: 'Weekday evenings' as const, updates: true },
       })),
       {
         id: 'data-demo',

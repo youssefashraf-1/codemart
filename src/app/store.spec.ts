@@ -71,10 +71,12 @@ describe('CodeMart browser records', () => {
       track: 'Cyber' as const,
       card: '4242',
       avatar: '',
+      preferences: { schedule: 'Weekends' as const, updates: false },
     };
     await store.signup(input);
     expect(store.user()?.role).toBe('student');
     expect(store.user()?.card).toBe('4242');
+    expect(store.user()?.preferences).toEqual({ schedule: 'Weekends', updates: false });
     expect(localStorage.getItem(storageKeys.records)).not.toContain(input.password);
     expect(document.cookie).toContain(`${storageKeys.track}=Cyber`);
     store.logout();

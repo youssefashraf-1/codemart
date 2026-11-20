@@ -37,6 +37,8 @@ After signing in as a student, buy **Angular in Practice** and pay an unpaid ins
 - **Local storage** retains mock accounts, photos, invoices, plans, orders, payroll, and finance and catalog entries across reloads. New passwords use salted PBKDF2. Order lines capture the product price and royalty at purchase time so catalog edits preserve order history.
 - **Session storage** retains the account identifier and per-account shopping bags within the tab. Signing out clears the active account. A guest bag is carried into a student login.
 - **A first-party cookie** remembers the last chosen track for 30 days so the catalog can open with a relevant filter. It carries no credentials or payment data.
+- **Sound effects** play short tones for successful and failed actions. The on/off choice is a device preference kept in local storage.
+- **The CodeMart assistant** (bottom-left chat) answers questions about cohorts, fees, the store and finance tools. It works offline from catalog data, or with a Together AI key pasted under **AI key**. The key and the conversation stay in session storage, so they are cleared when the tab closes, and only public catalog facts and the visitor's role are sent to Together AI.
 - **Finance totals** count installments on their payment date and sales on their order date. Monthly expenses include operating costs and net instructor pay. Dates are recorded in the Cairo time zone.
 
 The app uses simulated identities, role checks and payments in the browser. Browser data can be inspected and edited by its user. Use sample profile details and test cards. Clear the site’s browser data to restore the seeded records.
